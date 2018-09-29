@@ -18,6 +18,11 @@ public class AccountController implements IAccountService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @RequestMapping("/")
+    public String index() {
+        return "ok";
+    }
+
     @ResponseBody
     @RequestMapping(value = "/increase", method = RequestMethod.POST)
     @Transactional

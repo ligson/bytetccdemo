@@ -65,7 +65,7 @@
         </layout>
     </appender>
 
-    <root level="INFO">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
         <!--<appender-ref ref="FILE.ERROR"/>
         <appender-ref ref="FILE"/>-->

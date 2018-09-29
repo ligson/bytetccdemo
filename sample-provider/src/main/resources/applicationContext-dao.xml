@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd"
+       default-lazy-init="true">
+
+
+    <bean id="basicDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/dt?useSSL=false"/>
+        <property name="username" value="root"/>
+        <property name="password" value="password"/>
+    </bean>
+    <bean id="bytetccUserTransaction" class="org.bytesoft.bytetcc.UserCompensableImpl"/>
+    <bean id="compensableSynchronization" class="org.bytesoft.bytetcc.supports.spring.CompensableMethodInterceptor"/>
+    <bean id="transactionBeanFactory" class="org.bytesoft.bytetcc.TransactionBeanFactoryImpl">
+        <property name="compensableSynchronization" ref="compensableSynchronization"/>
+    </bean>
+    <bean id="transactionManagerImpl" class="org.bytesoft.bytetcc.TransactionManagerImpl">
+        <property name="beanFactory" ref="transactionBeanFactory"/>
+    </bean>
+    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="userTransaction" ref="bytetccUserTransaction"/>
+        <property name="transactionManager" ref="transactionManagerImpl"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="jtaTransactionManager"/>
+    <bean id="dataSource" class="org.bytesoft.bytejta.supports.jdbc.LocalXADataSource">
+        <property name="dataSource" ref="basicDataSource"/>
+    </bean>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+</beans>

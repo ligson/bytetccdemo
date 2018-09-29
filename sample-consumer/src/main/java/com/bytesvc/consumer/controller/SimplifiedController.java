@@ -18,48 +18,53 @@ import com.bytesvc.consumer.feign.IAccountService;
 @Compensable(interfaceClass = ITransferService.class, simplified = true)
 @RestController
 public class SimplifiedController implements ITransferService {
-	@Autowired
-	private TransferDao transferDao;
+    @Autowired
+    private TransferDao transferDao;
 
-	@Autowired
-	private IAccountService acctService;
+    @Autowired
+    private IAccountService acctService;
 
-	@ResponseBody
-	@RequestMapping(value = "/simplified/transfer", method = RequestMethod.POST)
-	@Transactional
-	public void transfer(@RequestParam String sourceAcctId, @RequestParam String targetAcctId, @RequestParam double amount) {
-		this.acctService.decreaseAmount(sourceAcctId, amount);
-		this.increaseAmount(targetAcctId, amount);
+    @RequestMapping("/")
+    public String index() {
+        return "ok";
+    }
 
-		// throw new IllegalStateException("rollback!");
-	}
+    @ResponseBody
+    @RequestMapping(value = "/simplified/transfer", method = RequestMethod.POST)
+    @Transactional
+    public void transfer(@RequestParam String sourceAcctId, @RequestParam String targetAcctId, @RequestParam double amount) {
+        this.acctService.decreaseAmount(sourceAcctId, amount);
+        this.increaseAmount(targetAcctId, amount);
 
-	private void increaseAmount(String acctId, double amount) {
-		int value = this.transferDao.increaseAmount(acctId, amount);
-		if (value != 1) {
-			throw new IllegalStateException("ERROR!");
-		}
-		System.out.printf("exec increase: acct= %s, amount= %7.2f%n", acctId, amount);
-	}
+        // throw new IllegalStateException("rollback!");
+    }
 
-	@CompensableConfirm
-	@Transactional
-	public void confirmTransfer(String sourceAcctId, String targetAcctId, double amount) {
-		int value = this.transferDao.confirmIncrease(targetAcctId, amount);
-		if (value != 1) {
-			throw new IllegalStateException("ERROR!");
-		}
-		System.out.printf("done increase: acct= %s, amount= %7.2f%n", targetAcctId, amount);
-	}
+    private void increaseAmount(String acctId, double amount) {
+        int value = this.transferDao.increaseAmount(acctId, amount);
+        if (value != 1) {
+            throw new IllegalStateException("ERROR!");
+        }
+        System.out.printf("exec increase: acct= %s, amount= %7.2f%n", acctId, amount);
+    }
 
-	@CompensableCancel
-	@Transactional
-	public void cancelTransfer(String sourceAcctId, String targetAcctId, double amount) {
-		int value = this.transferDao.cancelIncrease(targetAcctId, amount);
-		if (value != 1) {
-			throw new IllegalStateException("ERROR!");
-		}
-		System.out.printf("exec decrease: acct= %s, amount= %7.2f%n", targetAcctId, amount);
-	}
+    @CompensableConfirm
+    @Transactional
+    public void confirmTransfer(String sourceAcctId, String targetAcctId, double amount) {
+        int value = this.transferDao.confirmIncrease(targetAcctId, amount);
+        if (value != 1) {
+            throw new IllegalStateException("ERROR!");
+        }
+        System.out.printf("done increase: acct= %s, amount= %7.2f%n", targetAcctId, amount);
+    }
+
+    @CompensableCancel
+    @Transactional
+    public void cancelTransfer(String sourceAcctId, String targetAcctId, double amount) {
+        int value = this.transferDao.cancelIncrease(targetAcctId, amount);
+        if (value != 1) {
+            throw new IllegalStateException("ERROR!");
+        }
+        System.out.printf("exec decrease: acct= %s, amount= %7.2f%n", targetAcctId, amount);
+    }
 
 }
