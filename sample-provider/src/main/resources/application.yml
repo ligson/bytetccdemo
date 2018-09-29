@@ -2,8 +2,13 @@ server:
   port: 7070
 
 eureka:
-  instance:
-    hostname: inst1
   client:
     serviceUrl:
-      defaultZone: http://inst1:7000/eureka/
+      defaultZone: http://localhost:7000/eureka/
+#spring:
+#  datasource:
+#    username: root
+#    url: jdbc:mysql://localhost:3306/dt?useUnicode=true&amp;characterEncoding=UTF-8
+#    password: password
+#    driver-class-name: com.mysql.jdbc.Driver
+

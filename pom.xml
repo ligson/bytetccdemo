@@ -26,6 +26,10 @@
             <id>nexus</id>
             <url>http://maven.xiaoban.mobi/repository/maven-public/</url>
         </repository>
+        <repository>
+            <id>cruxmaven</id>
+            <url>http://maven.ufgov.com.cn/nexus/content/groups/crux</url>
+        </repository>
     </repositories>
     <parent>
         <groupId>com.xb</groupId>

@@ -1,51 +1,46 @@
 package com.bytesvc.provider.controller;
 
+import com.bytesvc.provider.service.IAccountService;
 import org.bytesoft.compensable.Compensable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.bytesvc.provider.service.IAccountService;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * ByteTCCÇãÏòÓÚÈÏÎª: Ê¹ÓÃSpringCloudÊ±, Ö±½Ó¶ÔÍâÌá¹©·şÎñµÄControllerÓ¦¸ÃÃ÷È·¹æ»®ºÃËüÊÇÆÕÍ¨·şÎñ»¹ÊÇTCC·şÎñ.<br />
- * Òò´Ë, 0.4.x°æ±¾Ç¿ÖÆ¶ÔÍâÌá¹©TCC·şÎñµÄController±ØĞë¼Ó@Compensable×¢½â(ÈôÃ»ÓĞÊµÖÊÒµÎñ, Ò²¿ÉÒÔ²»±ØÖ¸¶¨confirmableKeyºÍcancellableKey).<br />
- * Èô²»¼Ó@Compensable×¢½â, ÔòByteTCC½«Æäµ±³ÉÆÕÍ¨·şÎñ¶Ô´ı, ²»½ÓÊÕConsumer¶Ë´«²¥µÄÊÂÎñÉÏÏÂÎÄ. ÈôËüºóĞøµ÷ÓÃTCC·şÎñ, Ôò½«¿ªÆôĞÂµÄTCCÈ«¾ÖÊÂÎñ.
+ * ByteTCCå€¾å‘äºè®¤ä¸º: ä½¿ç”¨SpringCloudæ—¶, ç›´æ¥å¯¹å¤–æä¾›æœåŠ¡çš„Controlleråº”è¯¥æ˜ç¡®è§„åˆ’å¥½å®ƒæ˜¯æ™®é€šæœåŠ¡è¿˜æ˜¯TCCæœåŠ¡.<br />
+ * å› æ­¤, 0.4.xç‰ˆæœ¬å¼ºåˆ¶å¯¹å¤–æä¾›TCCæœåŠ¡çš„Controllerå¿…é¡»åŠ @Compensableæ³¨è§£(è‹¥æ²¡æœ‰å®è´¨ä¸šåŠ¡, ä¹Ÿå¯ä»¥ä¸å¿…æŒ‡å®šconfirmableKeyå’ŒcancellableKey).<br />
+ * è‹¥ä¸åŠ @Compensableæ³¨è§£, åˆ™ByteTCCå°†å…¶å½“æˆæ™®é€šæœåŠ¡å¯¹å¾…, ä¸æ¥æ”¶Consumerç«¯ä¼ æ’­çš„äº‹åŠ¡ä¸Šä¸‹æ–‡. è‹¥å®ƒåç»­è°ƒç”¨TCCæœåŠ¡, åˆ™å°†å¼€å¯æ–°çš„TCCå…¨å±€äº‹åŠ¡.
  */
 @Compensable(interfaceClass = IAccountService.class, confirmableKey = "accountServiceConfirm", cancellableKey = "accountServiceCancel")
 @RestController
 public class AccountController implements IAccountService {
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-	@ResponseBody
-	@RequestMapping(value = "/increase", method = RequestMethod.POST)
-	@Transactional
-	public void increaseAmount(@RequestParam("acctId") String acctId, @RequestParam("amount") double amount) {
-		int value = this.jdbcTemplate.update("update tb_account_one set frozen = frozen + ? where acct_id = ?", amount, acctId);
-		if (value != 1) {
-			throw new IllegalStateException("ERROR!");
-		}
-		System.out.printf("exec increase: acct= %s, amount= %7.2f%n", acctId, amount);
-	}
+    @ResponseBody
+    @RequestMapping(value = "/increase", method = RequestMethod.POST)
+    @Transactional
+    public void increaseAmount(@RequestParam("acctId") String acctId, @RequestParam("amount") double amount) {
+        int value = this.jdbcTemplate.update("update tb_account_one set frozen = frozen + ? where acct_id = ?", amount, acctId);
+        if (value != 1) {
+            throw new IllegalStateException("ERROR!");
+        }
+        System.out.printf("exec increase: acct= %s, amount= %7.2f%n", acctId, amount);
+    }
 
-	@ResponseBody
-	@RequestMapping(value = "/decrease", method = RequestMethod.POST)
-	@Transactional
-	public void decreaseAmount(@RequestParam("acctId") String acctId, @RequestParam("amount") double amount) {
-		int value = this.jdbcTemplate.update(
-				"update tb_account_one set amount = amount - ?, frozen = frozen + ? where acct_id = ?", amount, amount, acctId);
-		if (value != 1) {
-			throw new IllegalStateException("ERROR!");
-		}
-		System.out.printf("exec decrease: acct= %s, amount= %7.2f%n", acctId, amount);
+    @ResponseBody
+    @RequestMapping(value = "/decrease", method = RequestMethod.POST)
+    @Transactional
+    public void decreaseAmount(@RequestParam("acctId") String acctId, @RequestParam("amount") double amount) {
+        int value = this.jdbcTemplate.update(
+                "update tb_account_one set amount = amount - ?, frozen = frozen + ? where acct_id = ?", amount, amount, acctId);
+        if (value != 1) {
+            throw new IllegalStateException("ERROR!");
+        }
+        System.out.printf("exec decrease: acct= %s, amount= %7.2f%n", acctId, amount);
 
-		// throw new IllegalStateException("error");
-	}
+        // throw new IllegalStateException("error");
+    }
 
 }
