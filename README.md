@@ -61,7 +61,9 @@ bytetccdemo
 2.1. 注解说明
 
 *interfaceClass*: 定义接口，*controller*,确认，取消都要实现他的方法，并且方法上必须增加 *@Transactional* 注解
+
 *confirmableKey*: 确认操作接口实现
+
 *cancellableKey*: 取消操作接口实现
 
 ### bytetcc使用工作量分析
@@ -69,7 +71,8 @@ bytetccdemo
 1. 每部操作代码实现时必须分两步(Try/(Confirm、Cancel))
 
 2. 对应每个服务的方法必须实现确认和取消操作
-    
+
+3. 由于代码比较繁琐，try时必须预留冻结状态字段，所以关键操作这么做，不然代码量会比较多
     
 
 
