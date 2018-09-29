@@ -25,7 +25,7 @@ bytetccdemo
        targetAcctId : 2001   //用户2 id
        amount : 10           //用户1001 向2001转账金额
 
-### 业务流程
+### 业务流程（用户1001(provider服务)像用户2001(consumer服务)转账10元）
     
     1. sample-consumer调用sample-provider的接口decreaseAmount先扣除用户1001余额10 并且把10 存入用户1001的冻结字段
     
