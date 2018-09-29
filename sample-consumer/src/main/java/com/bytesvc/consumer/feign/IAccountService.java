@@ -1,11 +1,11 @@
-package com.bytesvc.feign.service;
+package com.bytesvc.consumer.feign;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "SPRINGCLOUD-SAMPLE-PROVIDER")
+@FeignClient(value = "springcloud-sample-provider")
 public interface IAccountService {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/increase")

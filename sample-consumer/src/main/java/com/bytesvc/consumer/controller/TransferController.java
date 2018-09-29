@@ -1,6 +1,8 @@
 package com.bytesvc.consumer.controller;
 
 import org.bytesoft.compensable.Compensable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,44 +10,46 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.bytesvc.consumer.feign.IAccountService;
 
 import com.bytesvc.consumer.dao.TransferDao;
 import com.bytesvc.consumer.service.ITransferService;
-import com.bytesvc.feign.service.IAccountService;
 
 @Compensable(interfaceClass = ITransferService.class, confirmableKey = "transferServiceConfirm", cancellableKey = "transferServiceCancel")
 @RestController
 public class TransferController implements ITransferService {
-	@Autowired
-	private TransferDao transferDao;
+    private static Logger logger = LoggerFactory.getLogger(TransferController.class);
+    @Autowired
+    private TransferDao transferDao;
 
-	@Autowired
-	private IAccountService acctService;
+    @Autowired
+    private IAccountService acctService;
 
-	@ResponseBody
-	@RequestMapping(value = "/transfer", method = RequestMethod.POST)
-	@Transactional
-	public void transfer(@RequestParam String sourceAcctId, @RequestParam String targetAcctId, @RequestParam double amount) {
-		this.acctService.decreaseAmount(sourceAcctId, amount);
-		this.increaseAmount(targetAcctId, amount);
-	}
+    @ResponseBody
+    @RequestMapping(value = "/transfer", method = RequestMethod.POST)
+    @Transactional
+    public void transfer(@RequestParam String sourceAcctId, @RequestParam String targetAcctId, @RequestParam double amount) {
+        logger.debug("è´¦å·ï¼š{}å‘è´¦å·:{}è½¬è´¦:{}", sourceAcctId, targetAcctId, amount);
+        this.acctService.decreaseAmount(sourceAcctId, amount);
+        this.increaseAmount(targetAcctId, amount);
+    }
 
-	private void increaseAmount(String acctId, double amount) {
-		int value = this.transferDao.increaseAmount(acctId, amount);
-		if (value != 1) {
-			throw new IllegalStateException("ERROR!");
-		}
-		System.out.printf("exec increase: acct= %s, amount= %7.2f%n", acctId, amount);
-	}
+    private void increaseAmount(String acctId, double amount) {
+        int value = this.transferDao.increaseAmount(acctId, amount);
+        if (value != 1) {
+            throw new IllegalStateException("ERROR!");
+        }
+        System.out.printf("exec increase: acct= %s, amount= %7.2f%n", acctId, amount);
+    }
 
-	/**
-	 * ±¾·½·¨ÓÃÓÚÑİÊ¾£º TransferControllerÖĞ¿ÉÒÔ´æÔÚ@Compensable.interfaceClassÖ¸¶¨½Ó¿ÚÖĞÎ´¶¨ÒåµÄ·½·¨. <br />
-	 * ĞèÒª×¢ÒâµÄÊÇ, Î´ÔÚinterfaceClass½Ó¿ÚÖĞ¶¨ÒåµÄ·½·¨, ²»ÊôÓÚ¿É²¹³¥ĞÍÒµÎñ²Ù×÷, ²»×ßTCCÈ«¾ÖÊÂÎñ. <br />
-	 */
-	@ResponseBody
-	@RequestMapping(value = "/getAmount", method = RequestMethod.POST)
-	public Double getAmount(@RequestParam String targetAcctId) {
-		return this.transferDao.getAcctAmount(targetAcctId);
-	}
+    /**
+     * æœ¬æ–¹æ³•ç”¨äºæ¼”ç¤ºï¼š TransferControllerä¸­å¯ä»¥å­˜åœ¨@Compensable.interfaceClassæŒ‡å®šæ¥å£ä¸­æœªå®šä¹‰çš„æ–¹æ³•. <br />
+     * éœ€è¦æ³¨æ„çš„æ˜¯, æœªåœ¨interfaceClassæ¥å£ä¸­å®šä¹‰çš„æ–¹æ³•, ä¸å±äºå¯è¡¥å¿å‹ä¸šåŠ¡æ“ä½œ, ä¸èµ°TCCå…¨å±€äº‹åŠ¡. <br />
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getAmount", method = RequestMethod.POST)
+    public Double getAmount(@RequestParam String targetAcctId) {
+        return this.transferDao.getAcctAmount(targetAcctId);
+    }
 
 }

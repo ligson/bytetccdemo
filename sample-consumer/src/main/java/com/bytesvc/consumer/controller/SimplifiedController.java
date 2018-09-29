@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bytesvc.consumer.dao.TransferDao;
 import com.bytesvc.consumer.service.ITransferService;
-import com.bytesvc.feign.service.IAccountService;
+import com.bytesvc.consumer.feign.IAccountService;
 
 @Compensable(interfaceClass = ITransferService.class, simplified = true)
 @RestController
