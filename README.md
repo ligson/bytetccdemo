@@ -83,6 +83,24 @@ bytetccdemo
 
 *cancelMethod*: 接口的取消方法
 
+3. sring的配置文件增加
+
+```xml
+ <bean class="org.mengyun.tcctransaction.spring.recover.DefaultRecoverConfig">
+        <property name="maxRetryCount" value="30"/>
+        <property name="recoverDuration" value="5"/>
+        <property name="cronExpression" value="0/5 * * * * ?"/>
+    </bean>
+
+    <bean id="transactionRepository"
+          class="org.mengyun.tcctransaction.spring.repository.SpringJdbcTransactionRepository">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="domain" value="ORDER"/>
+        <property name="tbSuffix" value="_ORD"/>
+        <property name="serializer" ref="objectSerializer"/>
+    </bean>
+    <bean id="objectSerializer" class="org.mengyun.tcctransaction.serializer.KryoPoolSerializer"/>
+```
 ### 工作量分析
 
 1. 每部操作代码实现时必须分两步(Try/(Confirm、Cancel))
