@@ -5,25 +5,13 @@
        default-lazy-init="true">
 
 
-    <bean id="basicDataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
         <property name="url" value="jdbc:mysql://localhost:3306/dt2?useSSL=false"/>
         <property name="username" value="root"/>
         <property name="password" value="password"/>
     </bean>
-    <import resource="classpath:bytetcc-supports-jta.xml"/>
-    <import resource="classpath:bytetcc-supports-tcc.xml"/>
 
-    <import resource="classpath:bytetcc-supports-task.xml"/>
-    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
-        <property name="userTransaction" ref="bytetccUserTransaction"/>
-        <property name="transactionManager" ref="bytejtaTransactionManager"/>
-    </bean>
-    <tx:annotation-driven transaction-manager="jtaTransactionManager"/>
-    <bean id="dataSource" class="org.bytesoft.bytejta.supports.jdbc.LocalXADataSource">
-        <property name="dataSource" ref="basicDataSource"/>
-        <property name="transactionManager" ref="bytejtaTransactionManager"/>
-    </bean>
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="dataSource"/>
     </bean>
@@ -43,42 +31,20 @@
     <bean id="sessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
         <constructor-arg index="0" ref="sessionFactory"/>
     </bean>
-    <bean id="bytejtaBeanFactory" class="org.bytesoft.bytejta.TransactionBeanFactoryImpl" factory-method="getInstance">
-        <property name="transactionManager" ref="bytejtaTransactionManager" />
-        <property name="xidFactory" ref="bytejtaXidFactory" />
-        <property name="transactionTimer" ref="bytejtaTransactionManager" />
-        <property name="transactionLogger" ref="bytejtaTransactionLogger" />
-        <property name="transactionRepository" ref="bytejtaTransactionRepository" />
-        <property name="transactionInterceptor" ref="bytejtaTransactionInterceptor" />
-        <property name="transactionRecovery" ref="bytejtaTransactionRecovery" />
-        <property name="transactionCoordinator" ref="bytejtaTransactionCoordinator" />
-        <property name="transactionLock" ref="bytejtaTransactionLock" />
-    </bean>
-    <bean id="bytetccSynchronization" class="org.bytesoft.bytetcc.supports.spring.CompensableMethodInterceptor" />
-
-    <bean id="bytetccBeanFactory" class="org.bytesoft.bytetcc.TransactionBeanFactoryImpl">
-        <property name="transactionManager" ref="bytejtaTransactionManager" />
-        <property name="compensableManager" ref="bytetccCompensableManager" />
-        <property name="transactionXidFactory" ref="bytejtaXidFactory" />
-        <property name="compensableXidFactory" ref="bytetccXidFactory" />
-        <property name="transactionRepository" ref="bytejtaTransactionRepository" />
-        <property name="compensableRepository" ref="bytetccTransactionRepository" />
-        <property name="transactionRecovery" ref="bytejtaTransactionRecovery" />
-        <property name="compensableRecovery" ref="bytetccTransactionRecovery" />
-        <property name="transactionCoordinator" ref="bytejtaTransactionCoordinator" />
-        <property name="compensableCoordinator" ref="bytetccCompensableCoordinator" />
-        <property name="containerContext" ref="springContainerContext" />
-        <!--<property name="transactionInterceptor" ref="bytetccTransactionInterceptor" />-->
-        <property name="compensableLogger" ref="bytetccCompensableLogger" />
-        <!--<property name="archiveDeserializer" ref="bytetccArchiveDeserializer" />-->
-        <!--<property name="resourceDeserializer" ref="bytetccResourceDeserializer" />-->
-        <property name="localResourceCleaner" ref="bytetccCleanupWork" />
-        <property name="compensableContext" ref="bytetccCompensableContext" />
-        <!--<property name="compensableLock" ref="bytetccCompensableLock" />-->
-        <property name="compensableSynchronization" ref="bytetccSynchronization" />
-        <!--<property name="compensableRolledbackMarker" ref="bytetccTransactionRepository" />-->
+    <bean class="org.mengyun.tcctransaction.spring.recover.DefaultRecoverConfig">
+        <property name="maxRetryCount" value="30"/>
+        <property name="recoverDuration" value="5"/>
+        <property name="cronExpression" value="0/5 * * * * ?"/>
     </bean>
 
+    <bean id="transactionRepository"
+          class="org.mengyun.tcctransaction.spring.repository.SpringJdbcTransactionRepository">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="domain" value="ORDER"/>
+        <property name="tbSuffix" value="_ORD"/>
+        <property name="serializer" ref="objectSerializer"/>
+    </bean>
+    <bean id="objectSerializer" class="org.mengyun.tcctransaction.serializer.KryoPoolSerializer"/>
 
 
 </beans>

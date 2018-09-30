@@ -33,13 +33,17 @@ bytetccdemo
     
     1. 把dt.sql dt2.sql 导入数据库
     
-    2. sample-consumer使用数据库 dt2(数据库连接方式配置参考ConsumerConfig)
+    2. sample-consumer使用数据库 dt2(数据库连接方式配置参考applicationContext-dao.xml)
     
-    3. sample-provider使用数据dt (数据库连接方式配置参考ProviderConfig)
+    3. sample-provider使用数据dt (数据库连接方式配置参考applicationContext-dao.xml)
 
-    4. 配置后依次启动 sample-eureka-server sample-provider sample-consumer
+    4. 配置后依次启动 sample-provider sample-consumer
+        
+        sample-provider的tomcat配置 contextpath:/provider port:8081
+        
+        sample-consumer的tomcat配置 contextpath:/consumer port:8080
     
-    5. post调用接口 http://localhost:7080/transfer 参数
+    5. post调用接口 http://localhost:8080/consumer/transfer 参数
      
        sourceAcctId : 1001   //用户1 id
        targetAcctId : 2001   //用户2 id
@@ -51,66 +55,38 @@ bytetccdemo
     
     2. 如果第一步正确，sample-consumer 中用户2001增加冻结金额10
     
-    3. 如果前两部（try）正确则bytetcc会自动调用 sample-provider中配置的确认操作（Confirm）即扣除步骤1中用户2001冻结的余额10，然后在确认sample-consumer的确认操作
+    3. 如果前两部（try）正确则tcc-transcation会自动调用 sample-provider中配置的确认操作（Confirm）即扣除步骤1中用户2001冻结的余额10，然后在确认sample-consumer的确认操作
     
     4. 如果错误会自动调用对应的取消操作
     
-### bytetcc使用说明
+### tcc-transcation使用说明
 
-1.pom.xml 增加依赖
+1.pom.xml 增加依赖(注意排除依赖)
     
 ```xml
  <dependency>
-            <groupId>org.bytesoft</groupId>
-            <artifactId>bytetcc-supports-springcloud</artifactId>
-            <version>0.4.17</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm</artifactId>
-                </exclusion>
-            </exclusions>
+   <groupId>org.mengyun</groupId>
+   <artifactId>tcc-transaction-spring</artifactId>
+   <version>1.2.4.23</version>
  </dependency>
 ```
 
-2.在接口的controller 增加注解
+2.在service的实现增加注解
 
 ```java
-@Compensable(interfaceClass = IAccountService.class, confirmableKey = "accountServiceConfirm", cancellableKey = "accountServiceCancel")
+    @Transactional
+    @Compensable(confirmMethod = "confirmTransfer", cancelMethod = "cancelTransfer")
 ```
 2.1. 注解说明
 
-*interfaceClass*: 定义接口，*controller*,确认，取消都要实现他的方法，并且方法上必须增加 *@Transactional* 注解
+*confirmMethod*: 接口的确认方法 
 
-*confirmableKey*: 确认操作接口实现
+*cancelMethod*: 接口的取消方法
 
-*cancellableKey*: 取消操作接口实现
-
-### bytetcc使用工作量分析
+### 工作量分析
 
 1. 每部操作代码实现时必须分两步(Try/(Confirm、Cancel))
 
 2. 对应每个服务的方法必须实现确认和取消操作
 
 3. 由于代码比较繁琐，try时必须预留冻结状态字段，所以关键操作这么做，不然代码量会比较多
-
-### bytetcc使用约束
-
-1.共同约束
-    
-    仅支持使用@Transactional来配置事务，而不能通过xml来配置事务；
-    针对一个特定的可补偿型服务接口，业务系统提供的Try、Confirm、Cancel三个实现类，其Try实现类必须定义@Compensable注解，而Confirm、Cancel实现类则不能定义Compensable注解；
-    可补偿型服务的Try/Confirm/Cancel实现类/实现方法必须定义Transactional注解，且propagation必须是Required, RequiresNew, Mandatory中的一种（即业务代码必须参与事务，从0.3.0开始强制要求）；
-    业务系统不可使用随机端口（本约束与采用的负载均衡分发粒度相关，当使用ByteTCC按请求粒度负载均衡时可忽略该约束）；
-    用@Compensable注解的TCC型服务Controller必须实现一个业务接口（业务系统自行指定，但需要与Compensable.interfaceClass一致）；
-    在每个参与tcc事务的数据库中创建bytejta表（ddl见bytetcc-supports.jar/bytetcc.sql）；
-    JDK版本：7.0及以上版本；
-
-1.使用Spring Cloud的约束
-    
-    服务提供方Controler必须添加@Compensable注解；
-    不允许对Feign/Ribbon/RestTemplate等HTTP请求自行进行封装，但允许拦截；
-    如果需要定制instanceId, 格式必须为${ip}:${自行指定}:${port}；
-    
-
-
