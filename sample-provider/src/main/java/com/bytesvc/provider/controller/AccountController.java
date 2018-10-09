@@ -1,7 +1,6 @@
 package com.bytesvc.provider.controller;
 
 import com.bytesvc.provider.service.IAccountService;
-import org.bytesoft.compensable.Compensable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
  * 因此, 0.4.x版本强制对外提供TCC服务的Controller必须加@Compensable注解(若没有实质业务, 也可以不必指定confirmableKey和cancellableKey).<br />
  * 若不加@Compensable注解, 则ByteTCC将其当成普通服务对待, 不接收Consumer端传播的事务上下文. 若它后续调用TCC服务, 则将开启新的TCC全局事务.
  */
-@Compensable(interfaceClass = IAccountService.class, confirmableKey = "accountServiceConfirm", cancellableKey = "accountServiceCancel")
 @RestController
 public class AccountController implements IAccountService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
 
     @ResponseBody
     @RequestMapping(value = "/increase", method = RequestMethod.POST)
@@ -42,5 +41,6 @@ public class AccountController implements IAccountService {
 
         // throw new IllegalStateException("error");
     }
+
 
 }

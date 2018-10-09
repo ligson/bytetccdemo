@@ -10,3 +10,25 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:7000/eureka/
 
+spring:
+  datasource:
+    username: root
+    url: jdbc:mysql://localhost:3306/dt2?useSSL=false
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  kafka:
+    bootstrap-servers: localhost:9092
+#=============== consumer  =======================
+# 指定默认消费者group id
+    consumer:
+      group-id: test-consumer-group
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      #auto-commit-interval: 100
+      # 指定消息key和消息体的编解码方式
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+mybatis:
+  mapper-locations: classpath:META-INF/mybatis/mapper/*.xml
+  config-location: classpath:META-INF/mybatis/mybatis-config.xml

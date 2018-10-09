@@ -1,6 +1,5 @@
 package com.bytesvc.consumer.controller;
 
-import org.bytesoft.compensable.Compensable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import com.bytesvc.consumer.feign.IAccountService;
 import com.bytesvc.consumer.dao.TransferDao;
 import com.bytesvc.consumer.service.ITransferService;
 
-@Compensable(interfaceClass = ITransferService.class, confirmableKey = "transferServiceConfirm", cancellableKey = "transferServiceCancel")
 @RestController
 public class TransferController implements ITransferService {
     private static Logger logger = LoggerFactory.getLogger(TransferController.class);
